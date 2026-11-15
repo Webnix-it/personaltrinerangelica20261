@@ -174,6 +174,9 @@
 
   $$('.admin-nav-item').forEach(function (button) {
     button.addEventListener('click', function () {
+      /* Il pulsante Guida non è un pannello. */
+      if (!button.dataset.panel) return;
+
       $$('.admin-nav-item').forEach(function (item) {
         var active = item === button;
         item.classList.toggle('is-active', active);
@@ -445,6 +448,406 @@
         updateStats('Locale');
       }
     );
+  }
+
+  /* ---------------- guida interattiva ---------------- */
+
+  var TOUR_STEPS = [
+    {
+      target: '.admin-topbar-logo',
+      title: 'Logo',
+      text: 'Il logo in alto a sinistra riporta alla Home del sito.',
+    },
+    {
+      target: '#userEmail',
+      title: 'Il tuo account',
+      text: 'Mostra l’email con cui hai fatto l’accesso: è quella che Firebase usa per autorizzare le modifiche.',
+    },
+    {
+      target: '.admin-home-btn',
+      title: 'Pulsante Home',
+      text: 'Apre la pagina pubblica del sito, così controlli subito il risultato di quello che hai salvato.',
+    },
+    {
+      target: '#logoutBtn',
+      title: 'Esci',
+      text: 'Chiude la sessione e torna alla schermata di accesso con Google.',
+    },
+    {
+      target: '.admin-sidebar',
+      title: 'Menu laterale',
+      text: 'Le sezioni della dashboard: Panoramica, Recensioni, Social & Link, Foto e Pulsanti. In fondo ci sono Tutorial e Istruzioni.',
+    },
+    {
+      panel: 'overview',
+      target: '#statTotal',
+      title: 'Recensioni pubblicate',
+      text: 'Quante recensioni ci sono adesso su Firebase: il numero si aggiorna da solo a ogni modifica.',
+    },
+    {
+      panel: 'overview',
+      target: '#statAverage',
+      title: 'Valutazione media',
+      text: 'La media delle stelle di tutte le recensioni. Se non ce ne sono ancora, resta un trattino.',
+    },
+    {
+      panel: 'overview',
+      target: '#statSource',
+      title: 'Origine dati',
+      text: 'Indica se i dati arrivano da Firebase o sono locali: se leggi Locale, Firebase non è raggiungibile.',
+    },
+    {
+      panel: 'overview',
+      target: '#maintenanceToggle',
+      title: 'Banner di manutenzione',
+      text: 'Il toggle mostra o nasconde il banner lime sotto la navbar del sito. Salva da solo, senza altri passaggi.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#reviewName',
+      title: 'Nome',
+      text: 'Il nome del cliente che ha lasciato la recensione, da 1 a 40 caratteri.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#reviewInitial',
+      title: 'Iniziale del cognome',
+      text: 'Una sola lettera maiuscola, per tutelare la privacy: il campo accetta solo un carattere da A a Z.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#starsField',
+      title: 'Stelle',
+      text: 'Clicca la stella corrispondente, da 1 a 5: è la valutazione che verrà pubblicata.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#reviewText',
+      title: 'Descrizione',
+      text: 'Il testo della recensione, da 5 a 1200 caratteri: compare nella Home sotto il nome.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#reviewSubmit',
+      title: 'Salva recensione',
+      text: 'Pubblica la recensione nella Home. Se stai modificando una recensione esistente salva le correzioni e compare Annulla modifica.',
+    },
+    {
+      panel: 'recensioni',
+      target: '.admin-search-row',
+      title: 'Ricerca',
+      text: 'La lente espande il campo di ricerca: filtra la lista per nome, iniziale o testo mentre digiti.',
+    },
+    {
+      panel: 'recensioni',
+      target: '#reviewsList',
+      title: 'Lista recensioni',
+      text: 'Ogni scheda mostra autore, stelle e testo, con Modifica (ripopola il form) ed Elimina (chiede conferma prima di cancellare).',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.instagram.url"])',
+      title: 'Instagram',
+      text: 'Inserisci l’indirizzo del profilo. Il toggle a destra decide se l’icona appare nel footer: spento, sparisce del tutto.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.tiktok.url"])',
+      title: 'TikTok',
+      text: 'Come Instagram: indirizzo del profilo e toggle per mostrarlo o nasconderlo nel footer.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.facebook.url"])',
+      title: 'Facebook',
+      text: 'Pagina Facebook collegata al pulsante del footer, con il suo interruttore di visibilità.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.youtube.url"])',
+      title: 'YouTube',
+      text: 'Canale YouTube mostrato nel footer, con il suo interruttore di visibilità.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.whatsapp.url"])',
+      title: 'WhatsApp',
+      text: 'Il link WhatsApp del sito: viene usato anche dal banner di manutenzione. Puoi inserire l’indirizzo completo wa.me o solo il numero.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.email.url"])',
+      title: 'Email',
+      text: 'L’indirizzo email del pulsante nel footer: basta scriverlo senza mailto:, ci pensa la Home ad aggiungerlo.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="social.google.url"])',
+      title: 'Recensioni Google',
+      text: 'Il collegamento alla scheda delle recensioni su Google, con il suo interruttore.',
+    },
+    {
+      panel: 'social',
+      target: '.admin-social-row:has([data-setting="pixel.id"])',
+      title: 'Facebook Pixel',
+      text: 'Inserisci l’ID Pixel e attiva il toggle: il tracciamento viene caricato sul sito pubblico, non qui in dashboard.',
+    },
+    {
+      panel: 'social',
+      target: '[data-save-settings="social"]',
+      title: 'Salva Social & Link',
+      text: 'Scrive profili e Pixel su Firebase: la Home applica le modifiche da sola, senza toccare il codice.',
+    },
+    {
+      panel: 'foto',
+      target: '.admin-image-row:has([data-setting="images.chiSono"])',
+      title: 'Chi sono — prima foto',
+      text: 'L’indirizzo della foto principale della sezione Chi sono: percorso locale o indirizzo completo.',
+    },
+    {
+      panel: 'foto',
+      target: '.admin-image-row:has([data-setting="images.chiSono2"])',
+      title: 'Chi sono — seconda foto',
+      text: 'La seconda immagine dello slideshow: le due foto si alternano ogni 3 secondi.',
+    },
+    {
+      panel: 'foto',
+      target: '.admin-image-row:has([data-setting="images.metodo"])',
+      title: 'Metodo — atleta',
+      text: 'La foto della sezione Metodo.',
+    },
+    {
+      panel: 'foto',
+      target: '#panel-foto .admin-image-previews',
+      title: 'Anteprime',
+      text: 'A sinistra vedi la foto attuale, a destra quella nuova: così controlli prima di salvare.',
+    },
+    {
+      panel: 'foto',
+      target: '[data-save-settings="foto"]',
+      title: 'Salva Foto',
+      text: 'Aggiorna gli indirizzi su Firebase: la Home usa subito le nuove immagini.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '.admin-button-row:has([data-setting="buttons.prenota"])',
+      title: 'Prenota la tua prima sessione gratuita',
+      text: 'Inserisci un’email o un numero WhatsApp: i pulsanti con questo testo useranno quel collegamento.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '.admin-button-row:has([data-setting="buttons.domanda"])',
+      title: 'Hai una domanda? Contattami',
+      text: 'Il collegamento del pulsante vicino alle FAQ, indipendente dagli altri.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '.admin-button-row:has([data-setting="buttons.prenotaOra"])',
+      title: 'Prenota ora',
+      text: 'Il pulsante della sezione percorsi: puoi puntarlo a un’altra email o a un altro numero WhatsApp.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '.admin-button-row:has([data-setting="buttons.percorso"])',
+      title: 'Richiedi il percorso',
+      text: 'I tre pulsanti delle card dei percorsi condividono questo collegamento.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '.admin-button-row:has([data-setting="buttons.sessione"])',
+      title: 'Sessione gratuita',
+      text: 'Il pulsante in alto nella navbar del sito.',
+    },
+    {
+      panel: 'pulsanti',
+      target: '[data-save-settings="pulsanti"]',
+      title: 'Salva Pulsanti',
+      text: 'Salva tutti i collegamenti su Firebase: testo e stile dei pulsanti restano quelli del sito.',
+    },
+    {
+      target: '#guideBtn',
+      title: 'Tutorial',
+      text: 'Riavvia questo tour guidato quando vuoi: ti accompagna elemento per elemento.',
+    },
+    {
+      target: '#instructionsBtn',
+      title: 'Istruzioni',
+      text: 'Apre il manuale scritto con la spiegazione di ogni elemento, sezione per sezione.',
+    },
+  ];
+
+  var tourIndex = 0;
+  var tourActive = false;
+  var tourCompleted = false;
+
+  var tourSpot = $('#tourSpotlight');
+  var tourTip = $('#tourTip');
+  var tourProgress = $('#tourProgress');
+  var tourTitle = $('#tourTitle');
+  var tourText = $('#tourText');
+  var tourPrev = $('#tourPrev');
+  var tourNext = $('#tourNext');
+  var tourEnd = $('#tourEnd');
+
+  function placeTour() {
+    var step = TOUR_STEPS[tourIndex];
+    var target = step ? $(step.target) : null;
+    if (!target) return;
+
+    var rect = target.getBoundingClientRect();
+    var pad = 8;
+
+    tourSpot.style.top = Math.round(rect.top - pad) + 'px';
+    tourSpot.style.left = Math.round(rect.left - pad) + 'px';
+    tourSpot.style.width = Math.round(rect.width + pad * 2) + 'px';
+    tourSpot.style.height = Math.round(rect.height + pad * 2) + 'px';
+
+    var width = Math.min(340, window.innerWidth - 32);
+    tourTip.style.width = width + 'px';
+
+    var height = tourTip.offsetHeight;
+    var left = Math.min(Math.max(16, rect.left), window.innerWidth - width - 16);
+    var top = rect.bottom + 14;
+
+    if (top + height > window.innerHeight - 16) {
+      top = Math.max(16, rect.top - height - 14);
+    }
+
+    tourTip.style.left = Math.round(left) + 'px';
+    tourTip.style.top = Math.round(top) + 'px';
+  }
+
+  function showTourStep(index) {
+    tourIndex = index;
+    tourCompleted = false;
+
+    var step = TOUR_STEPS[index];
+    var target = $(step.target);
+
+    if (step.panel) {
+      var navButton = $('.admin-nav-item[data-panel="' + step.panel + '"]');
+      if (navButton) navButton.click();
+      target = $(step.target);
+    }
+
+    tourPrev.hidden = false;
+    tourNext.hidden = false;
+    tourEnd.textContent = 'Termina guida';
+    tourPrev.disabled = index === 0;
+    tourNext.textContent = index === TOUR_STEPS.length - 1 ? 'Fine' : 'Avanti';
+    tourProgress.textContent = 'Passaggio ' + (index + 1) + ' di ' + TOUR_STEPS.length;
+    tourTitle.textContent = step.title;
+    tourText.textContent = step.text;
+
+    tourSpot.hidden = false;
+    tourTip.hidden = false;
+
+    if (target && target.scrollIntoView) {
+      target.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
+
+    /* Aspetta che il pannello sia visibile prima di misurare. */
+    window.setTimeout(placeTour, 80);
+  }
+
+  function startTour() {
+    tourActive = true;
+    tourCompleted = false;
+    tourTip.style.transform = '';
+    showTourStep(0);
+  }
+
+  function closeTour() {
+    tourActive = false;
+    tourCompleted = false;
+    tourSpot.hidden = true;
+    tourTip.hidden = true;
+    tourEnd.textContent = 'Termina guida';
+    tourPrev.hidden = false;
+    tourNext.hidden = false;
+  }
+
+  function completeTour() {
+    tourCompleted = true;
+    tourSpot.hidden = true;
+    tourProgress.textContent = '';
+    tourTitle.textContent = 'Tutorial completato';
+    tourText.textContent = 'Hai completato il tutorial della dashboard!';
+    tourPrev.hidden = true;
+    tourNext.hidden = true;
+    tourEnd.textContent = 'Chiudi';
+
+    var width = Math.min(320, window.innerWidth - 32);
+    tourTip.style.width = width + 'px';
+    tourTip.style.left = Math.round((window.innerWidth - width) / 2) + 'px';
+    tourTip.style.top = Math.round(Math.max(16, window.innerHeight / 2 - 110)) + 'px';
+    tourTip.hidden = false;
+
+    toast('Hai completato il tutorial della dashboard!');
+  }
+
+  if (tourNext) {
+    tourNext.addEventListener('click', function () {
+      if (tourCompleted) { closeTour(); return; }
+      if (tourIndex >= TOUR_STEPS.length - 1) { completeTour(); return; }
+      showTourStep(tourIndex + 1);
+    });
+
+    tourPrev.addEventListener('click', function () {
+      if (tourIndex > 0) showTourStep(tourIndex - 1);
+    });
+
+    tourEnd.addEventListener('click', function () { closeTour(); });
+
+    document.addEventListener('keydown', function (event) {
+      if (!tourActive || tourTip.hidden) return;
+      if (event.key === 'Escape') closeTour();
+      if (event.key === 'ArrowRight' && !tourCompleted) tourNext.click();
+      if (event.key === 'ArrowLeft' && !tourCompleted && tourIndex > 0) tourPrev.click();
+    });
+
+    window.addEventListener('resize', function () {
+      if (tourActive && !tourCompleted) placeTour();
+    });
+
+    window.addEventListener('scroll', function () {
+      if (tourActive && !tourCompleted) placeTour();
+    }, { passive: true });
+  }
+
+  var guideBtn = $('#guideBtn');
+  if (guideBtn) guideBtn.addEventListener('click', startTour);
+
+  /* ---------------- istruzioni (manuale scritto) ---------------- */
+
+  var instructionsModal = $('#instructionsModal');
+  var instructionsBtn = $('#instructionsBtn');
+
+  function openInstructions() {
+    if (!instructionsModal) return;
+    instructionsModal.hidden = false;
+    var closeBtn = $('[data-instructions-close]', instructionsModal);
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeInstructions() {
+    if (!instructionsModal) return;
+    instructionsModal.hidden = true;
+  }
+
+  if (instructionsBtn) instructionsBtn.addEventListener('click', openInstructions);
+
+  if (instructionsModal) {
+    instructionsModal.addEventListener('click', function (event) {
+      var target = event.target;
+      if (target === instructionsModal || (target.closest && target.closest('[data-instructions-close]'))) {
+        closeInstructions();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !instructionsModal.hidden) closeInstructions();
+    });
   }
 
   /* ---------------- impostazioni del sito ---------------- */

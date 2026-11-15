@@ -11,20 +11,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
 
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body class="admin-body">
 
   <!-- ============ ACCESSO ============ -->
   <section class="admin-gate" id="adminGate">
     <div class="admin-gate-card">
-      <a href="index.html" class="logo admin-logo" aria-label="Torna al sito">
-        <img src="logo 2.png" alt="Logo Dott.ssa Angelica Frascarolo" />
-      </a>
+      <span class="admin-gate-label">Area riservata</span>
 
-      <span class="admin-kicker">Area riservata</span>
-      <h1 class="admin-gate-title">Dashboard</h1>
-      <p class="admin-gate-text">Accedi con l'account Google dell'amministratore per gestire le recensioni del sito.</p>
+      <div class="admin-gate-head">
+        <a href="index.html" class="logo admin-logo" aria-label="Torna al sito">
+          <img src="logo 2.png" alt="Logo Dott.ssa Angelica Frascarolo" />
+        </a>
+
+        <h2 class="admin-gate-title">Dashboard</h2>
+      </div>
+      <p class="admin-gate-text">
+        Solo il personale autorizzato può accedere. Effettua l'accesso con l'account Google abilitato alla gestione del sito.
+      </p>
+      <p class="admin-gate-note">
+        <i class="bx bx-lock-alt" aria-hidden="true"></i>
+        Le credenziali non vengono condivise: ogni accesso è legato a un singolo account Google.
+      </p>
 
       <button class="btn btn-primary admin-google" type="button" id="googleLogin">
         <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
@@ -87,6 +96,16 @@
           <i class="bx bx-pointer" aria-hidden="true"></i>
           <span>Pulsanti</span>
         </button>
+
+        <button class="admin-nav-item admin-guide-btn" type="button" id="guideBtn">
+          <i class="bx bx-play-circle" aria-hidden="true"></i>
+          <span>Tutorial</span>
+        </button>
+
+        <button class="admin-nav-item admin-guide-btn admin-help-btn" type="button" id="instructionsBtn">
+          <i class="bx bx-book-open" aria-hidden="true"></i>
+          <span>Istruzioni</span>
+        </button>
       </aside>
 
       <!-- CONTENUTO -->
@@ -95,7 +114,9 @@
         <!-- PANORAMICA -->
         <section class="admin-panel is-active" id="panel-overview">
           <h1 class="admin-panel-title">Panoramica</h1>
-          <p class="admin-panel-sub">Riepilogo delle recensioni pubblicate sul sito.</p>
+          <p class="admin-panel-sub">
+            Riepilogo delle recensioni pubblicate e interruttore del banner di manutenzione del sito.
+          </p>
 
           <div class="admin-stats">
             <article class="admin-stat">
@@ -455,8 +476,113 @@
 
   <div class="admin-toast" id="adminToast" role="status" aria-live="polite"></div>
 
-  <script src="firebase-config.js?v=3"></script>
-  <script src="firebase-site.js?v=3"></script>
-  <script src="admin.js?v=3"></script>
+  <!-- ============ ISTRUZIONI ============ -->
+  <div class="admin-modal instructions-modal" id="instructionsModal" hidden>
+    <div class="instructions-box" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
+      <header class="instructions-head">
+        <div>
+          <span class="admin-kicker">Manuale rapido</span>
+          <h2 id="instructionsTitle">Istruzioni</h2>
+          <p class="instructions-sub">Cosa fa ogni elemento della dashboard, sezione per sezione.</p>
+        </div>
+        <button class="instructions-close" type="button" data-instructions-close aria-label="Chiudi le istruzioni">
+          <i class="bx bx-x" aria-hidden="true"></i>
+        </button>
+      </header>
+
+      <div class="instructions-body">
+        <section class="instructions-section">
+          <h3><i class="bx bx-layout" aria-hidden="true"></i> Barra superiore</h3>
+          <ul>
+            <li><strong>Logo</strong> — riporta alla Home del sito.</li>
+            <li><strong>Email e iniziale</strong> — mostrano l'account con cui hai fatto l'accesso.</li>
+            <li><strong>Home</strong> — apre la pagina pubblica del sito.</li>
+            <li><strong>Esci</strong> — chiude la sessione e torna alla schermata di accesso.</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-grid-alt" aria-hidden="true"></i> Panoramica</h3>
+          <ul>
+            <li><strong>Recensioni pubblicate</strong> — quante recensioni ci sono adesso su Firebase.</li>
+            <li><strong>Valutazione media</strong> — media delle stelle di tutte le recensioni.</li>
+            <li><strong>Origine dati</strong> — se i dati arrivano da Firebase oppure sono locali (Firebase non raggiungibile).</li>
+            <li><strong>Banner di manutenzione</strong> — il toggle mostra o nasconde l'avviso lime sotto la navbar del sito; salva da solo.</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-message-square-dots" aria-hidden="true"></i> Recensioni</h3>
+          <ul>
+            <li><strong>Nome</strong> — il nome del cliente (1–40 caratteri).</li>
+            <li><strong>Iniziale cognome</strong> — una sola lettera maiuscola, per privacy.</li>
+            <li><strong>Stelle</strong> — da 1 a 5, clicca la stella desiderata.</li>
+            <li><strong>Descrizione</strong> — il testo della recensione (5–1200 caratteri).</li>
+            <li><strong>Salva recensione</strong> — pubblica subito la recensione nella Home; durante una modifica il pulsante salva le correzioni e compare <em>Annulla modifica</em>.</li>
+            <li><strong>Ricerca</strong> — filtra la lista per nome, iniziale o testo mentre digiti.</li>
+            <li><strong>Lista</strong> — ogni scheda ha <em>Modifica</em> (ripopola il form) ed <em>Elimina</em> (chiede conferma prima di cancellare).</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-link" aria-hidden="true"></i> Social &amp; Link</h3>
+          <ul>
+            <li><strong>Campo URL</strong> — l'indirizzo del profilo (per l'email basta l'indirizzo, senza mailto:).</li>
+            <li><strong>Toggle</strong> — acceso: l'icona compare nel footer del sito; spento: sparisce del tutto.</li>
+            <li><strong>ID Pixel / toggle</strong> — attiva il Facebook Pixel sul sito con l'ID indicato.</li>
+            <li><strong>Salva</strong> — scrive le modifiche su Firebase; la Home si aggiorna da sola.</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-images" aria-hidden="true"></i> Foto</h3>
+          <ul>
+            <li><strong>Campo immagine</strong> — percorso locale (<code>foto1.png</code>) o indirizzo completo dell'immagine.</li>
+            <li><strong>Attuale</strong> — la foto in uso adesso; <strong>Nuova</strong> — quella che stai inserendo.</li>
+            <li><strong>Salva</strong> — la Home usa subito il nuovo indirizzo, senza toccare i file.</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-pointer" aria-hidden="true"></i> Pulsanti</h3>
+          <ul>
+            <li><strong>Campo collegamento</strong> — email (diventa <code>mailto:</code>), numero (diventa WhatsApp) oppure URL completo.</li>
+            <li><strong>Anteprima</strong> — come apparirà il pulsante nel sito, con lo stesso stile.</li>
+            <li><strong>Collegamento attuale</strong> — cosa sta usando ora quel pulsante.</li>
+            <li><strong>Salva</strong> — aggiorna il sito senza cambiare testo o grafica dei pulsanti.</li>
+          </ul>
+        </section>
+
+        <section class="instructions-section">
+          <h3><i class="bx bx-play-circle" aria-hidden="true"></i> Tutorial</h3>
+          <ul>
+            <li>Avvia il tour guidato che evidenzia un elemento alla volta, con Avanti, Indietro e Termina guida.</li>
+          </ul>
+        </section>
+      </div>
+
+      <footer class="instructions-foot">
+        <button class="btn btn-primary" type="button" data-instructions-close>Chiudi</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ TUTORIAL INTERATTIVO ============ -->
+  <div class="tour-spotlight" id="tourSpotlight" hidden aria-hidden="true"></div>
+
+  <div class="tour-tip" id="tourTip" hidden role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <span class="tour-progress" id="tourProgress"></span>
+    <h3 class="tour-title" id="tourTitle"></h3>
+    <p class="tour-text" id="tourText"></p>
+    <div class="tour-actions">
+      <button class="btn btn-secondary tour-btn" type="button" id="tourPrev">Indietro</button>
+      <button class="btn btn-primary tour-btn" type="button" id="tourNext">Avanti</button>
+      <button class="tour-end" type="button" id="tourEnd">Termina guida</button>
+    </div>
+  </div>
+
+  <script src="firebase-config.js?v=5"></script>
+  <script src="firebase-site.js?v=5"></script>
+  <script src="admin.js?v=5"></script>
 </body>
 </html>
